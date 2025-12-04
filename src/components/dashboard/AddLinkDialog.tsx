@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,18 +8,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserLink } from "@/types";
 
 interface AddLinkDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (link: Omit<UserLink, "id" | "clicks" | "order">) => void;
-  editLink?: UserLink | null;
+  onSave: (link: { title: string; url: string; isActive: boolean }) => void;
+  editLink?: {
+    id: string;
+    title: string;
+    url: string;
+    isActive: boolean;
+    clicks: number;
+    order: number;
+  } | null;
 }
 
 export const AddLinkDialog = ({ open, onOpenChange, onSave, editLink }: AddLinkDialogProps) => {
-  const [title, setTitle] = useState(editLink?.title || "");
-  const [url, setUrl] = useState(editLink?.url || "");
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    if (editLink) {
+      setTitle(editLink.title);
+      setUrl(editLink.url);
+    } else {
+      setTitle("");
+      setUrl("");
+    }
+  }, [editLink, open]);
 
   const handleSave = () => {
     if (!title.trim() || !url.trim()) return;
@@ -32,7 +48,6 @@ export const AddLinkDialog = ({ open, onOpenChange, onSave, editLink }: AddLinkD
     
     setTitle("");
     setUrl("");
-    onOpenChange(false);
   };
 
   return (

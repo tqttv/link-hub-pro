@@ -1,13 +1,19 @@
 import { motion } from "framer-motion";
-import { UserLink } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { GripVertical, Pencil, Trash2, BarChart2 } from "lucide-react";
 
 interface LinkCardProps {
-  link: UserLink;
+  link: {
+    id: string;
+    title: string;
+    url: string;
+    isActive: boolean;
+    clicks: number;
+    order: number;
+  };
   onToggle: (id: string) => void;
-  onEdit: (link: UserLink) => void;
+  onEdit: (link: any) => void;
   onDelete: (id: string) => void;
 }
 

@@ -1,46 +1,61 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockProfile } from "@/data/mockData";
-import { Eye, MousePointer, Link2, TrendingUp } from "lucide-react";
-
-const stats = [
-  {
-    title: "مشاهدات الصفحة",
-    value: "2,847",
-    change: "+12.5%",
-    icon: Eye,
-    color: "text-primary",
-  },
-  {
-    title: "نقرات الروابط",
-    value: "5,097",
-    change: "+8.2%",
-    icon: MousePointer,
-    color: "text-secondary",
-  },
-  {
-    title: "عدد الروابط",
-    value: mockProfile.links.length.toString(),
-    change: "نشط",
-    icon: Link2,
-    color: "text-green-500",
-  },
-  {
-    title: "معدل النقر",
-    value: "18.3%",
-    change: "+3.1%",
-    icon: TrendingUp,
-    color: "text-orange-500",
-  },
-];
+import { useProfile } from "@/hooks/useProfile";
+import { useLinks } from "@/hooks/useLinks";
+import { Eye, MousePointer, Link2, TrendingUp, Loader2 } from "lucide-react";
 
 const DashboardHome = () => {
+  const { profile, loading: profileLoading } = useProfile();
+  const { links, loading: linksLoading } = useLinks();
+
+  const totalClicks = links.reduce((acc, link) => acc + link.clicks, 0);
+  const activeLinks = links.filter(l => l.is_active).length;
+
+  const stats = [
+    {
+      title: "مشاهدات الصفحة",
+      value: "0",
+      change: "جديد",
+      icon: Eye,
+      color: "text-primary",
+    },
+    {
+      title: "نقرات الروابط",
+      value: totalClicks.toLocaleString(),
+      change: "إجمالي",
+      icon: MousePointer,
+      color: "text-secondary",
+    },
+    {
+      title: "عدد الروابط",
+      value: links.length.toString(),
+      change: `${activeLinks} نشط`,
+      icon: Link2,
+      color: "text-green-500",
+    },
+    {
+      title: "معدل النقر",
+      value: "0%",
+      change: "قريباً",
+      icon: TrendingUp,
+      color: "text-orange-500",
+    },
+  ];
+
+  if (profileLoading || linksLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6" dir="rtl">
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold font-heading text-foreground">
-          مرحباً، {mockProfile.displayName} 👋
+          مرحباً، {profile?.display_name || "مستخدم"} 👋
         </h1>
         <p className="text-muted-foreground">
           إليك نظرة عامة على أداء صفحتك
@@ -66,7 +81,7 @@ const DashboardHome = () => {
               <CardContent>
                 <div className="text-2xl font-bold text-foreground">{stat.value}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-green-500">{stat.change}</span> من الشهر الماضي
+                  <span className="text-green-500">{stat.change}</span>
                 </p>
               </CardContent>
             </Card>
@@ -80,27 +95,33 @@ const DashboardHome = () => {
           <CardTitle className="font-heading">الروابط الأكثر نقراً</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {mockProfile.links
-              .filter(l => l.isActive)
-              .sort((a, b) => b.clicks - a.clicks)
-              .slice(0, 5)
-              .map((link, index) => (
-                <div key={link.id} className="flex items-center gap-4">
-                  <span className="text-2xl font-bold text-muted-foreground w-8">
-                    {index + 1}
-                  </span>
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">{link.title}</p>
-                    <p className="text-sm text-muted-foreground truncate">{link.url}</p>
+          {links.length > 0 ? (
+            <div className="space-y-4">
+              {links
+                .filter(l => l.is_active)
+                .sort((a, b) => b.clicks - a.clicks)
+                .slice(0, 5)
+                .map((link, index) => (
+                  <div key={link.id} className="flex items-center gap-4">
+                    <span className="text-2xl font-bold text-muted-foreground w-8">
+                      {index + 1}
+                    </span>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">{link.title}</p>
+                      <p className="text-sm text-muted-foreground truncate">{link.url}</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-foreground">{link.clicks}</p>
+                      <p className="text-xs text-muted-foreground">نقرة</p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <p className="font-bold text-foreground">{link.clicks}</p>
-                    <p className="text-xs text-muted-foreground">نقرة</p>
-                  </div>
-                </div>
-              ))}
-          </div>
+                ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              لا توجد روابط بعد. أضف روابطك الأولى!
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
