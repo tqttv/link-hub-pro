@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Link2, Sparkles, BarChart3, Palette, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const features = [
   {
@@ -22,6 +23,8 @@ const features = [
 ];
 
 const Index = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen gradient-hero" dir="rtl">
       {/* Background decoration */}
@@ -38,12 +41,20 @@ const Index = () => {
             <span className="text-xl font-bold font-heading text-gradient">LinkTree</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/preview">
-              <Button variant="ghost">معاينة</Button>
-            </Link>
-            <Link to="/dashboard">
-              <Button variant="gradient">لوحة التحكم</Button>
-            </Link>
+            {user ? (
+              <Link to="/dashboard">
+                <Button variant="gradient">لوحة التحكم</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="ghost">تسجيل الدخول</Button>
+                </Link>
+                <Link to="/auth">
+                  <Button variant="gradient">ابدأ الآن</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -87,15 +98,10 @@ const Index = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link to="/dashboard">
+            <Link to={user ? "/dashboard" : "/auth"}>
               <Button variant="gradient" size="xl" className="group">
-                ابدأ الآن مجاناً
+                {user ? "لوحة التحكم" : "ابدأ الآن مجاناً"}
                 <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link to="/preview">
-              <Button variant="outline" size="xl">
-                شاهد مثالاً
               </Button>
             </Link>
           </motion.div>
@@ -158,12 +164,12 @@ const Index = () => {
           <p className="text-primary-foreground/80 mb-8 max-w-xl mx-auto">
             انضم لآلاف المبدعين الذين يستخدمون منصتنا لمشاركة روابطهم
           </p>
-          <Link to="/dashboard">
+          <Link to={user ? "/dashboard" : "/auth"}>
             <Button 
               size="xl" 
               className="bg-background text-foreground hover:bg-background/90 font-semibold"
             >
-              أنشئ صفحتك الآن
+              {user ? "افتح لوحة التحكم" : "أنشئ صفحتك الآن"}
             </Button>
           </Link>
         </motion.div>
@@ -172,7 +178,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="relative z-10 border-t border-border py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          <p>© 2024 LinkTree Clone. جميع الحقوق محفوظة.</p>
+          <p>© 2024 LinkTree. جميع الحقوق محفوظة.</p>
         </div>
       </footer>
     </div>

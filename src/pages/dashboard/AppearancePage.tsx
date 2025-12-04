@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { mockProfile } from "@/data/mockData";
-import { Camera, Check } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { Camera, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const themes = [
@@ -18,17 +18,45 @@ const themes = [
 ];
 
 const AppearancePage = () => {
-  const [profile, setProfile] = useState({
-    displayName: mockProfile.displayName,
-    username: mockProfile.username,
-    bio: mockProfile.bio,
-    avatarUrl: mockProfile.avatarUrl,
-  });
+  const { profile, loading, updateProfile } = useProfile();
+  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
   const [selectedTheme, setSelectedTheme] = useState("dark");
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
-    toast.success("تم حفظ التغييرات بنجاح");
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name);
+      setUsername(profile.username);
+      setBio(profile.bio || "");
+      setSelectedTheme(profile.theme || "dark");
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    const { error } = await updateProfile({
+      display_name: displayName,
+      bio,
+      theme: selectedTheme,
+    });
+    setIsSaving(false);
+
+    if (error) {
+      toast.error("حدث خطأ أثناء حفظ التغييرات");
+    } else {
+      toast.success("تم حفظ التغييرات بنجاح");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -53,9 +81,9 @@ const AppearancePage = () => {
               <div className="flex justify-center">
                 <div className="relative">
                   <Avatar className="w-24 h-24 border-4 border-primary/30">
-                    <AvatarImage src={profile.avatarUrl} />
+                    <AvatarImage src={profile?.avatar_url} />
                     <AvatarFallback className="text-2xl font-bold">
-                      {profile.displayName.charAt(0)}
+                      {displayName?.charAt(0) || "م"}
                     </AvatarFallback>
                   </Avatar>
                   <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
@@ -69,8 +97,8 @@ const AppearancePage = () => {
                 <div className="space-y-2">
                   <Label>الاسم المعروض</Label>
                   <Input
-                    value={profile.displayName}
-                    onChange={(e) => setProfile(p => ({ ...p, displayName: e.target.value }))}
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                   />
                 </div>
 
@@ -81,26 +109,32 @@ const AppearancePage = () => {
                       linktr.ee/
                     </span>
                     <Input
-                      value={profile.username}
-                      onChange={(e) => setProfile(p => ({ ...p, username: e.target.value }))}
+                      value={username}
+                      disabled
                       className="rounded-r-none"
                       dir="ltr"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground">لا يمكن تغيير اسم المستخدم</p>
                 </div>
 
                 <div className="space-y-2">
                   <Label>النبذة التعريفية</Label>
                   <Textarea
-                    value={profile.bio}
-                    onChange={(e) => setProfile(p => ({ ...p, bio: e.target.value }))}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
                     rows={3}
                   />
                 </div>
               </div>
 
-              <Button variant="gradient" className="w-full" onClick={handleSave}>
-                حفظ التغييرات
+              <Button 
+                variant="gradient" 
+                className="w-full" 
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}
               </Button>
             </CardContent>
           </Card>

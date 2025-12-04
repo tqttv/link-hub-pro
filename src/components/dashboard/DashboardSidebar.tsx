@@ -1,4 +1,6 @@
 import { NavLink } from "@/components/NavLink";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 import { 
   LayoutDashboard, 
   Link2, 
@@ -9,6 +11,8 @@ import {
   LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const navItems = [
   { icon: LayoutDashboard, label: "لوحة التحكم", href: "/dashboard" },
@@ -19,6 +23,16 @@ const navItems = [
 ];
 
 export const DashboardSidebar = () => {
+  const { signOut } = useAuth();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("تم تسجيل الخروج");
+    navigate("/");
+  };
+
   return (
     <aside className="w-64 min-h-screen bg-card border-l border-border p-6 flex flex-col">
       {/* Logo */}
@@ -48,14 +62,19 @@ export const DashboardSidebar = () => {
 
       {/* Preview & Logout */}
       <div className="space-y-2 pt-4 border-t border-border">
-        <NavLink
-          to="/preview"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground"
+        {profile && (
+          <NavLink
+            to={`/${profile.username}`}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground"
+          >
+            <Eye className="w-5 h-5" />
+            <span>معاينة صفحتي</span>
+          </NavLink>
+        )}
+        <button 
+          onClick={handleSignOut}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
         >
-          <Eye className="w-5 h-5" />
-          <span>معاينة</span>
-        </NavLink>
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive">
           <LogOut className="w-5 h-5" />
           <span>تسجيل الخروج</span>
         </button>

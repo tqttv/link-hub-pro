@@ -3,62 +3,77 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { LinkCard } from "@/components/dashboard/LinkCard";
 import { AddLinkDialog } from "@/components/dashboard/AddLinkDialog";
-import { mockProfile } from "@/data/mockData";
-import { UserLink } from "@/types";
-import { Plus, Link2 } from "lucide-react";
+import { useLinks, Link } from "@/hooks/useLinks";
+import { Plus, Link2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const LinksPage = () => {
-  const [links, setLinks] = useState<UserLink[]>(mockProfile.links);
+  const { links, loading, addLink, updateLink, deleteLink, toggleLink } = useLinks();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingLink, setEditingLink] = useState<UserLink | null>(null);
+  const [editingLink, setEditingLink] = useState<Link | null>(null);
 
-  const handleToggle = (id: string) => {
-    setLinks(prev =>
-      prev.map(link =>
-        link.id === id ? { ...link, isActive: !link.isActive } : link
-      )
-    );
-    toast.success("تم تحديث حالة الرابط");
+  const handleToggle = async (id: string) => {
+    const { error } = await toggleLink(id);
+    if (error) {
+      toast.error("حدث خطأ أثناء تحديث الرابط");
+    } else {
+      toast.success("تم تحديث حالة الرابط");
+    }
   };
 
-  const handleEdit = (link: UserLink) => {
+  const handleEdit = (link: Link) => {
     setEditingLink(link);
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setLinks(prev => prev.filter(link => link.id !== id));
-    toast.success("تم حذف الرابط");
+  const handleDelete = async (id: string) => {
+    const { error } = await deleteLink(id);
+    if (error) {
+      toast.error("حدث خطأ أثناء حذف الرابط");
+    } else {
+      toast.success("تم حذف الرابط");
+    }
   };
 
-  const handleSave = (linkData: Omit<UserLink, "id" | "clicks" | "order">) => {
+  const handleSave = async (linkData: { title: string; url: string; isActive: boolean }) => {
     if (editingLink) {
-      setLinks(prev =>
-        prev.map(link =>
-          link.id === editingLink.id
-            ? { ...link, ...linkData }
-            : link
-        )
-      );
-      toast.success("تم تحديث الرابط");
+      const { error } = await updateLink(editingLink.id, {
+        title: linkData.title,
+        url: linkData.url,
+        is_active: linkData.isActive,
+      });
+      if (error) {
+        toast.error("حدث خطأ أثناء تحديث الرابط");
+      } else {
+        toast.success("تم تحديث الرابط");
+      }
     } else {
-      const newLink: UserLink = {
-        ...linkData,
-        id: Date.now().toString(),
-        clicks: 0,
-        order: links.length + 1,
-      };
-      setLinks(prev => [...prev, newLink]);
-      toast.success("تم إضافة الرابط");
+      const { error } = await addLink({
+        title: linkData.title,
+        url: linkData.url,
+      });
+      if (error) {
+        toast.error("حدث خطأ أثناء إضافة الرابط");
+      } else {
+        toast.success("تم إضافة الرابط");
+      }
     }
     setEditingLink(null);
+    setDialogOpen(false);
   };
 
   const handleOpenDialog = () => {
     setEditingLink(null);
     setDialogOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -81,9 +96,16 @@ const LinksPage = () => {
             {links.map(link => (
               <LinkCard
                 key={link.id}
-                link={link}
+                link={{
+                  id: link.id,
+                  title: link.title,
+                  url: link.url,
+                  isActive: link.is_active,
+                  clicks: link.clicks,
+                  order: link.sort_order,
+                }}
                 onToggle={handleToggle}
-                onEdit={handleEdit}
+                onEdit={() => handleEdit(link)}
                 onDelete={handleDelete}
               />
             ))}
@@ -114,7 +136,14 @@ const LinksPage = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSave={handleSave}
-        editLink={editingLink}
+        editLink={editingLink ? {
+          id: editingLink.id,
+          title: editingLink.title,
+          url: editingLink.url,
+          isActive: editingLink.is_active,
+          clicks: editingLink.clicks,
+          order: editingLink.sort_order,
+        } : null}
       />
     </div>
   );
