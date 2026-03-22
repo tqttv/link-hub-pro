@@ -159,7 +159,7 @@ const ProfilePage = () => {
               className={`inline-flex items-center gap-2 text-xs ${theme.footerColor} hover:opacity-80 transition-opacity`}
             >
               <Sparkles className="w-3 h-3" />
-              <span>صُنع بواسطة LinkTree</span>
+              <span>صُنع بواسطة Linke One</span>
             </a>
           </motion.footer>
         </motion.div>

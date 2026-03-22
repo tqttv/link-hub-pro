@@ -61,7 +61,7 @@ const ThemePreview = ({ themeId, displayName, bio, avatarUrl }: ThemePreviewProp
 
         {/* Footer */}
         <p className={`text-[10px] mt-3 ${theme.footerColor}`}>
-          صُنع بواسطة لينكاتي
+          صُنع بواسطة Linke One
         </p>
       </div>
     </div>

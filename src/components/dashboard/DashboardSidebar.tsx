@@ -38,7 +38,7 @@ export const DashboardSidebar = () => {
       {/* Logo */}
       <div className="mb-8">
         <h1 className="text-xl font-bold font-heading text-gradient">
-          🔗 LinkTree
+          🔗 Linke One
         </h1>
       </div>
 

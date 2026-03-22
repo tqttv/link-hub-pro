@@ -166,7 +166,7 @@ const Auth = () => {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    سيظهر في رابط صفحتك: linktr.ee/{username || "username"}
+                    سيظهر في رابط صفحتك: linkeone.com/{username || "username"}
                   </p>
                 </div>
               </>

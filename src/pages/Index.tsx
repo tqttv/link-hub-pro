@@ -178,7 +178,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="relative z-10 border-t border-border py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          <p>© 2024 LinkTree. جميع الحقوق محفوظة.</p>
+          <p>© 2024 Linke One. جميع الحقوق محفوظة.</p>
         </div>
       </footer>
     </div>
