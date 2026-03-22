@@ -21,11 +21,15 @@ const themes = [
 
 const AppearancePage = () => {
   const { profile, loading, updateProfile } = useProfile();
+  const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [selectedTheme, setSelectedTheme] = useState("dark");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
     if (profile) {
