@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Camera, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,11 +21,15 @@ const themes = [
 
 const AppearancePage = () => {
   const { profile, loading, updateProfile } = useProfile();
+  const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [selectedTheme, setSelectedTheme] = useState("dark");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
     if (profile) {
@@ -31,8 +37,52 @@ const AppearancePage = () => {
       setUsername(profile.username);
       setBio(profile.bio || "");
       setSelectedTheme(profile.theme || "dark");
+      setAvatarUrl(profile.avatar_url || "");
     }
   }, [profile]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("يرجى اختيار ملف صورة");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("حجم الصورة يجب أن يكون أقل من 2 ميجابايت");
+      return;
+    }
+
+    setIsUploading(true);
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${user.id}/avatar.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast.error("حدث خطأ أثناء رفع الصورة");
+      setIsUploading(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    const newUrl = `${publicUrl}?t=${Date.now()}`;
+    const { error: updateError } = await updateProfile({ avatar_url: newUrl });
+
+    if (updateError) {
+      toast.error("حدث خطأ أثناء تحديث الصورة");
+    } else {
+      setAvatarUrl(newUrl);
+      toast.success("تم تحديث الصورة بنجاح");
+    }
+    setIsUploading(false);
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -81,13 +131,28 @@ const AppearancePage = () => {
               <div className="flex justify-center">
                 <div className="relative">
                   <Avatar className="w-24 h-24 border-4 border-primary/30">
-                    <AvatarImage src={profile?.avatar_url} />
+                    <AvatarImage src={avatarUrl} />
                     <AvatarFallback className="text-2xl font-bold">
                       {displayName?.charAt(0) || "م"}
                     </AvatarFallback>
                   </Avatar>
-                  <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
-                    <Camera className="w-4 h-4" />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
