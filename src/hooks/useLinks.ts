@@ -110,7 +110,19 @@ export const useLinks = () => {
     return { error: new Error("Link not found") };
   };
 
-  return { links, loading, addLink, updateLink, deleteLink, toggleLink, refetch: fetchLinks };
+  const reorderLinks = async (reorderedLinks: Link[]) => {
+    setLinks(reorderedLinks);
+    const updates = reorderedLinks.map((link, index) =>
+      supabase
+        .from("links")
+        .update({ sort_order: index })
+        .eq("id", link.id)
+        .eq("user_id", user!.id)
+    );
+    await Promise.all(updates);
+  };
+
+  return { links, loading, addLink, updateLink, deleteLink, toggleLink, reorderLinks, refetch: fetchLinks };
 };
 
 export const useLinksByUserId = (userId: string) => {
