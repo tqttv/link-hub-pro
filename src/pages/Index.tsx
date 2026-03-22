@@ -38,7 +38,7 @@ const Index = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link2 className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold font-heading text-gradient">LinkTree</span>
+            <span className="text-xl font-bold font-heading text-gradient">Linke One</span>
           </div>
           <div className="flex items-center gap-4">
             {user ? (
