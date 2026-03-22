@@ -71,14 +71,25 @@ const Auth = () => {
           return;
         }
 
+        // Check if username is already taken
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("username", username)
+          .maybeSingle();
+
+        if (existingProfile) {
+          toast.error("اسم المستخدم مستخدم بالفعل، اختر اسمًا آخر");
+          setIsLoading(false);
+          return;
+        }
+
         const { error } = await signUp(email, password, username, displayName);
         if (error) {
           if (error.message.includes("User already registered")) {
             toast.error("البريد الإلكتروني مسجل مسبقاً");
-          } else if (error.message.includes("duplicate key")) {
-            toast.error("اسم المستخدم مستخدم بالفعل");
           } else {
-            toast.error("حدث خطأ أثناء إنشاء الحساب");
+            toast.error("حدث خطأ أثناء إنشاء الحساب: " + error.message);
           }
         } else {
           toast.success("تم إنشاء الحساب بنجاح!");
