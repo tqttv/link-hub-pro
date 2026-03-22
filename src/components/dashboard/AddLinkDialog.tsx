@@ -173,7 +173,7 @@ export const AddLinkDialog = ({ open, onOpenChange, onSave, editLink }: AddLinkD
                       {IconComponent ? (
                         <IconComponent className="w-5 h-5" style={{ color: platform.color }} />
                       ) : (
-                        <span className="text-xl">{platform.icon}</span>
+                        <span className="text-xl">{platform.icon as string}</span>
                       )}
                     </div>
                     <span className="text-xs font-medium text-foreground">{platform.name}</span>
