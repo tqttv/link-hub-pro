@@ -41,6 +41,49 @@ const AppearancePage = () => {
     }
   }, [profile]);
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("يرجى اختيار ملف صورة");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("حجم الصورة يجب أن يكون أقل من 2 ميجابايت");
+      return;
+    }
+
+    setIsUploading(true);
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${user.id}/avatar.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast.error("حدث خطأ أثناء رفع الصورة");
+      setIsUploading(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    const newUrl = `${publicUrl}?t=${Date.now()}`;
+    const { error: updateError } = await updateProfile({ avatar_url: newUrl });
+
+    if (updateError) {
+      toast.error("حدث خطأ أثناء تحديث الصورة");
+    } else {
+      setAvatarUrl(newUrl);
+      toast.success("تم تحديث الصورة بنجاح");
+    }
+    setIsUploading(false);
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     const { error } = await updateProfile({
