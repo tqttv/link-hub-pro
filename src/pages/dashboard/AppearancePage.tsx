@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Camera, Check, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { themeConfigs } from "@/lib/themes";
+import ThemePreview from "@/components/dashboard/ThemePreview";
 
 const AppearancePage = () => {
   const { profile, loading, updateProfile } = useProfile();
