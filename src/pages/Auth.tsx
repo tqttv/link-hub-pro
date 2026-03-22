@@ -121,7 +121,7 @@ const Auth = () => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
             <Link2 className="w-8 h-8 text-primary" />
-            <span className="text-2xl font-bold font-heading text-gradient">LinkTree</span>
+            <span className="text-2xl font-bold font-heading text-gradient">Linke One</span>
           </div>
           <h1 className="text-2xl font-bold font-heading text-foreground">
             {isLogin ? "تسجيل الدخول" : "إنشاء حساب جديد"}
