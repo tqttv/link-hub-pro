@@ -37,6 +37,7 @@ const AppearancePage = () => {
       setUsername(profile.username);
       setBio(profile.bio || "");
       setSelectedTheme(profile.theme || "dark");
+      setAvatarUrl(profile.avatar_url || "");
     }
   }, [profile]);
 
