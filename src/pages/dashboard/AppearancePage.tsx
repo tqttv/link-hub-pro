@@ -178,7 +178,7 @@ const AppearancePage = () => {
                   <Label>اسم المستخدم</Label>
                   <div className="flex">
                     <span className="inline-flex items-center px-3 rounded-r-none rounded-lg border border-l-0 border-input bg-muted text-muted-foreground text-sm">
-                      linktr.ee/
+                      linkeone.com/
                     </span>
                     <Input
                       value={username}
