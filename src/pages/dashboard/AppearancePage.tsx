@@ -131,13 +131,28 @@ const AppearancePage = () => {
               <div className="flex justify-center">
                 <div className="relative">
                   <Avatar className="w-24 h-24 border-4 border-primary/30">
-                    <AvatarImage src={profile?.avatar_url} />
+                    <AvatarImage src={avatarUrl} />
                     <AvatarFallback className="text-2xl font-bold">
                       {displayName?.charAt(0) || "م"}
                     </AvatarFallback>
                   </Avatar>
-                  <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
-                    <Camera className="w-4 h-4" />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
