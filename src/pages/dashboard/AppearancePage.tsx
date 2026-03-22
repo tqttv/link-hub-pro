@@ -9,15 +9,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, Check, Loader2 } from "lucide-react";
+import { Camera, Check, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
-
-const themes = [
-  { id: "dark", name: "داكن", bg: "bg-gray-900", accent: "bg-cyan-500" },
-  { id: "light", name: "فاتح", bg: "bg-white border", accent: "bg-purple-500" },
-  { id: "gradient", name: "متدرج", bg: "bg-gradient-to-br from-cyan-500 to-purple-500", accent: "bg-white" },
-  { id: "minimal", name: "بسيط", bg: "bg-gray-100", accent: "bg-gray-900" },
-];
+import { themeConfigs } from "@/lib/themes";
 
 const AppearancePage = () => {
   const { profile, loading, updateProfile } = useProfile();
@@ -96,7 +90,7 @@ const AppearancePage = () => {
     if (error) {
       toast.error("حدث خطأ أثناء حفظ التغييرات");
     } else {
-      toast.success("تم حفظ التغييرات بنجاح");
+      toast.success("تم حفظ التغييرات بنجاح — سيتم تطبيق المظهر على صفحتك الشخصية");
     }
   };
 
@@ -111,9 +105,21 @@ const AppearancePage = () => {
   return (
     <div className="space-y-6" dir="rtl">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold font-heading text-foreground">المظهر</h1>
-        <p className="text-muted-foreground">خصص مظهر صفحتك الشخصية</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold font-heading text-foreground">المظهر</h1>
+          <p className="text-muted-foreground">خصص مظهر صفحتك الشخصية</p>
+        </div>
+        {username && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open(`/${username}`, "_blank")}
+          >
+            <Eye className="w-4 h-4 ml-2" />
+            معاينة الصفحة
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -193,9 +199,9 @@ const AppearancePage = () => {
                 </div>
               </div>
 
-              <Button 
-                variant="gradient" 
-                className="w-full" 
+              <Button
+                variant="gradient"
+                className="w-full"
                 onClick={handleSave}
                 disabled={isSaving}
               >
@@ -214,29 +220,36 @@ const AppearancePage = () => {
           <Card className="shadow-card">
             <CardHeader>
               <CardTitle className="font-heading">اختر المظهر</CardTitle>
+              <p className="text-sm text-muted-foreground">المظهر المختار سيُطبق على صفحتك الشخصية العامة</p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                {themes.map((theme) => (
+                {themeConfigs.map((theme) => (
                   <button
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme.id)}
-                    className={`relative p-4 rounded-xl transition-all ${
-                      selectedTheme === theme.id 
-                        ? "ring-2 ring-primary ring-offset-2 ring-offset-background" 
-                        : "hover:scale-105"
+                    className={`relative p-3 rounded-xl transition-all duration-200 ${
+                      selectedTheme === theme.id
+                        ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.02]"
+                        : "hover:scale-105 opacity-80 hover:opacity-100"
                     }`}
                   >
-                    <div className={`h-32 rounded-lg ${theme.bg} flex flex-col items-center justify-center gap-2 p-4`}>
-                      <div className="w-10 h-10 rounded-full bg-gray-400" />
-                      <div className={`w-full h-3 rounded ${theme.accent}`} />
-                      <div className={`w-full h-3 rounded ${theme.accent} opacity-60`} />
+                    <div className={`h-36 rounded-lg ${theme.previewBg} flex flex-col items-center justify-center gap-2 p-4 overflow-hidden relative`}>
+                      {/* Mini preview of the theme */}
+                      <div className={`w-10 h-10 rounded-full ${theme.previewAccent} opacity-80`} />
+                      <div className={`w-3/4 h-3 rounded-full ${theme.previewAccent}`} />
+                      <div className={`w-3/4 h-3 rounded-full ${theme.previewAccent} opacity-60`} />
+                      <div className={`w-3/4 h-3 rounded-full ${theme.previewAccent} opacity-40`} />
                     </div>
                     <p className="text-sm font-medium text-foreground mt-2">{theme.name}</p>
                     {selectedTheme === theme.id && (
-                      <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute top-1 left-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
+                      >
                         <Check className="w-4 h-4 text-primary-foreground" />
-                      </div>
+                      </motion.div>
                     )}
                   </button>
                 ))}
