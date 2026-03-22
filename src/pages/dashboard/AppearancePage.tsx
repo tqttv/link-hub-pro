@@ -258,6 +258,31 @@ const AppearancePage = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Live Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="lg:col-span-2"
+        >
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="font-heading">معاينة حية</CardTitle>
+              <p className="text-sm text-muted-foreground">هكذا ستبدو صفحتك الشخصية بالمظهر المختار</p>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <div className="w-full max-w-sm">
+                <ThemePreview
+                  themeId={selectedTheme}
+                  displayName={displayName}
+                  bio={bio}
+                  avatarUrl={avatarUrl}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
